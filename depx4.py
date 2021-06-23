@@ -34,6 +34,26 @@ def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,
     I13 = 2
     SPELIA4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,W(I1),W(I2),W(I3),W(I4),W(I5),W(I6),W(I7),W(I8),W(I9),W(I10),W(I11),W(I12),GRHS,USOL,IDMN,W(I13),PERTRB,IERROR)
     return 
+def SPELI4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,AN,BN,CN,DN,UN,ZN,AM,BM,CM,DM,UM,ZM,GRHS,USOL,IDMN,W,PERTRB,IERROR):
+    global KSWX,KSWY,K,L
+    global AIT,BIT,CIT,DIT
+    global MIT,NIT,IS,MS
+    global JS,NS,DLX,DLY
+    global TDLX3,TDLY3,DLX4,DLY4
+    KSWX=MBDCND+1
+    KSWY=NBDCND+1
+    K=M+1
+    L=N+1
+    AIT = A
+    BIT = B
+    CIT = C
+    DIT = D
+    DLY=(DIT-CIT)/np.float32(N)
+    for I in range(2,M):
+        for J in range(2,N):
+            USOL[I][J]=DLY**2**GRHS[I][J]
+    if (KSWX==2 or KSWX==3):
+        f=0
 def CHKPR4(IORDER,A,B,M,MBDCND,C,D,N,NBDCND,COFX,IDMN,IERROR):
     IERROR=1
     if (A>=B and C>=D):
@@ -96,21 +116,7 @@ def DEFE4(COFX,IDMN,USOL,GRHS):
             USOL(I,J)=GRHS(I,J)
     return
 
-def SPELI4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,AN,BN,CN,DN,UN,ZN,AM,BM,CM,DM,UM,ZM,GRHS,USOL,IDMN,W,PERTRB,IERROR):
-    KSWX=MBDCND+1
-    KSWY=NBDCND+1
-    K=M+1
-    L=N+1
-    AIT = A
-    BIT = B
-    CIT = C
-    DIT = D
-    DLY=(DIT-CIT)/np.float32(N)
-    for I in range(2,M):
-        for J in range(2,N):
-            USOL[I][J]=DLY**2**GRHS[I][J]
-    if (KSWX==2 or KSWX==3):
-        f=0
+
 def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
     ISTR=1
     IFNL=k

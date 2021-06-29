@@ -79,3 +79,23 @@ def DX4(U,IDMN,I,J,UXXX,UXXXX):
         UXXX = -(float(3.00)*U[K-4][J]-float(14.00)*U[K-3][J]+float(24.00)*U[K-2][J]-float(18.00)*U[k-1][J]+float(5.00)*U[K][J])/TDLX3
         UXXXX = (-float(2.00)*U[K-5][J]+float(11.00)*U[K-4][J]-float(24.00)*U[K-3][J]+float(26.00)*U[K-2][J]-float(14.00)*U[k-1][J]+float(3.00)*U[K][J])/DLX4
         return
+def ORTHO4 (USOL,IDMN,ZN,ZM,PERTRB):
+    ISTR=IS
+    IFNL=MS
+    JSTR=JS
+    JFNL=NS
+
+    UTE=float(0.00)
+    ETE=float(0.00)
+    for I in range(IS,MS):
+        II=I-IS+1
+        for J in range(JS,NS):
+            JJ=J-JS+1
+            ETE=ETE+ZM[II]*ZN[JJ]
+            UTE=UTE+USOL[I][J]*ZM[II]*ZN[JJ]
+    
+    PERTRB=UTE/ETE
+    for I in range(ISTR,IFNL):
+        for J in range(JSTR,JFNL):
+            USOL[I][J]=USOL[I][J]-PERTRB
+    return

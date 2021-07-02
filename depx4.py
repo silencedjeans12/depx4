@@ -135,3 +135,118 @@ def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
         for J in range(JSTR, JFNL):
             USOL(I,J)=USOL(I,J)-PERTB
     return
+def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
+    IERROR=0
+    if(M<=2):
+        IERROR=1
+    if(N<=2):
+        IERROR=2
+    if(IDIMY<M):
+        IERROR=3
+    if(NPEROD<0 or NPEROD>4):
+        IERROR=4
+    if(MPEROD<0 or MPEROD>1):
+        IERROR=5
+    if(MPEROD==1):
+        if(A[1]!=0 or C[M]!=0):
+            IERROR=7
+        else:
+            if(IERROR!=0):
+                return
+    for I in range(2,M):
+        if(A[I]!=C[1]):
+            IERROR=6
+        if(C[I]!=C[1]):
+            IERROR=6
+        if(B[I]!=B[1]):
+            IERROR=6
+    MP1=M+1
+    IWBA=MP1
+    IWBB=IWBA+M
+    IWBC=IWBB+M
+    IWB2=IWBC+M
+    IWB3=IWB2+M
+    IWW1=IWB3+M
+    IWW2=IWW1+M
+    IWW3=IWW2+M
+    IWD=IWW3+M
+    IWTCOS=IWD+M
+    IWP=IWTCOS+4*N
+    for I in range(1,M):
+        K=IWBA+I-1
+        W[K]=-A[I]
+        K=IWBC+I-1
+        W[K]=-C[I]
+        K=IWBB+I-1
+        W[K]=float(2.00)-B[I]
+        for J in range(1,N):
+            Y[I][J]=-Y[I][J]
+    MP=MPEROD+1
+    NP=NPEROD+1
+    POISP2(M,N,W(IWBA),W(IWBB),W(IWBC),Y,IDIMY,W,W(IWB2),W(IWB3),W(IWW1),W(IWW2),W(IWW3),W(IWD),W(IWTCOS), W(IWP))
+    POISD2 (M,N,1,W(IWBA),W(IWBB),W(IWBC),Y,IDIMY,W,W(IWW1),W(IWD),W(IWTCOS),W(IWP))
+    POISN2 (M,N,1,2,W(IWBA),W(IWBB),W(IWBC),Y,IDIMY,W,W(IWB2),W(IWB3),W(IWW1),W(IWW2),W(IWW3),W(IWD),W(IWTCOS),W(IWP))
+    POISN2 (M,N,1,1,W(IWBA),W(IWBB),W(IWBC),Y,IDIMY,W,W(IWB2),W(IWB3),W(IWW1),W(IWW2),W(IWW3),W(IWD),W(IWTCOS),W(IWP))
+    IPSTOR=W[IWW1]
+    IREV=2
+    if(NPEROD==4):
+        for J in range(1,NBY2):
+            MSKIP=N+1-J
+            for I in range(1,M):
+                A1=Y[I][J]
+                Y[I][J]=Y[I][MSKIP]
+                Y[I][MSKIP]=A1
+                continue
+            continue
+    MH = (M+1)/2
+    MHM1 = MH-1
+    MODD = 1
+    if(MH==M):
+        MODD=2
+    for J in range(1,N):
+        for I in range(1,MHM1):
+            MHPI=MH+I
+            MHMI=MH-I
+            W[I]=Y[MHMI][J]-Y[MHPI][J]
+            W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
+            continue
+        W[MH]=float(2.00)*Y[MH][J]
+        W[M]=float(2.00)*Y[M][J]
+        continue
+    for I in range(1,M):
+        Y[I][J]=W[I]
+        continue
+    K=IWBC+MHM1-1
+    I = IWBA+MHM1
+    W[K] = float(0.00)
+    W[I] = float(0.00)
+    W[K+1] = float(2.00)*W[K+1]
+    K=IWBB+MHM1-1
+    W[K]=W[K]-W[I-1]
+    W[IWBC-1]=W[IWBC-1]+W[IWBB-1]
+    W[IWBB-1]=W[K+1]
+    IREV = 1
+    NBY2 = N/2
+    for J in range(1,NBY2):
+        MSKIP=N+1-J
+        for I in range(1,M):
+            A1=Y[I][J]
+            Y[I][J]=Y[I][MSKIP]
+            Y[I][MSKIP]=A1
+            continue
+        continue
+    for J in range(1,N):
+        for I in range(1,MHM1):
+            MHMI=MH-I
+            MHPI = MH+I
+            W[MHMI] =float(0.50)*(Y[MHPI][J]+Y[I][J])
+            W[MHPI] =float(0.50)*(Y[MHPI][J]-Y[I][J])
+            continue
+        W[MH]=float(0.50)*Y[MH][J]
+        W[M]=float(0.50)*Y[M][J]
+        continue
+    for I in range(1,M):
+        Y[I][J]=W[I]
+        continue
+    W[1]=IPSTOR+IWP-1
+    return

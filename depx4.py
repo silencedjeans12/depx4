@@ -250,3 +250,7 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         continue
     W[1]=IPSTOR+IWP-1
     return
+def MERGE (TCOS,I1,M1,I2,M2,I3):
+    J1 = 1
+    J2 = 1
+    J = I3

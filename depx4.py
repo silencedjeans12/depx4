@@ -250,6 +250,25 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         continue
     W[1]=IPSTOR+IWP-1
     return
+def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
+    M=MR
+    N=NR
+    JSH=0
+    FI=1.0/float(ISTAG)
+    IP=-M
+    IPSTOR=0
+    KR=0
+    IRREG=1
+    if(N>1):
+        LR=0
+        for I in range(1,M):
+            P[I]=float(0.00)
+    NUM=N
+    JST=1
+    JSP=N
+    
+    
+        
 def MERGE (TCOS,I1,M1,I2,M2,I3):
     TCOS=[]
     J1 = 1
@@ -257,3 +276,14 @@ def MERGE (TCOS,I1,M1,I2,M2,I3):
     J = I3
     if(M1==0):
         K=J+J2+1
+        for J in range(J2,M2):
+            M=K+J
+            L=J+I2
+            TCOS[M]=TCOS[L]
+    if(M2==0):
+        K=J+J1+1
+        for J in range(J1,M1):
+            M=K+J
+            L=J+I1
+            TCOS[M]=TCOS[L]
+    return

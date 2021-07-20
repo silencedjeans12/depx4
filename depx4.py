@@ -266,7 +266,7 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     NUM=N
     JST=1
     JSP=N
-    
+#continuacion.   
     
         
 def MERGE (TCOS,I1,M1,I2,M2,I3):

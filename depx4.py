@@ -13,9 +13,9 @@ def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,
     LOG2N=int(np.log(np.float32(N+1))/np.log(np.float32(2.0))+np.float32(0.50))
     LENGTH=4*(N+1)+(10+LOG2N)*(M+1)
     IERROR = 11
-    LINPUT = int(W[0]+0.5)
+    LINPUT = int(W[1]+0.5)
     LOUTPT = LENGTH+6*(K+L)+1
-    W.append(np.float32(LOUTPT))
+    W[1]=(np.float32(LOUTPT))
 #   IF (LOUTPT .GT. LINPUT) RETURN
     IERROR = 0
 #   SET WORK SPACE INDICES
@@ -52,11 +52,13 @@ def SPELI4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,AN,B
     for I in range(2,M):
         for J in range(2,N):
             USOL[I][J]=DLY**2**GRHS[I][J]
+            continue
+        continue
     if (KSWX==2 or KSWX==3):
         f=0
 def CHKPR4(IORDER,A,B,M,MBDCND,C,D,N,NBDCND,COFX,IDMN,IERROR):
     IERROR=1
-    if (A>=B and C>=D):
+    if (A>=B or C>=D):
         return
     IERROR=2
     if (MBDCND<0 or MBDCND>4):
@@ -83,6 +85,7 @@ def CHKPR4(IORDER,A,B,M,MBDCND,C,D,N,NBDCND,COFX,IDMN,IERROR):
     if (AI<float(0.00)):
         IERROR=10
     IERROR=0
+    return
 def CHKSN4(MBDCND,NBDCND,ALPHA,BETA,COFX,SINGLR):
     SINGLR=False
     if ((MBDCND!=0 and MBDCND!=3)or(NBDCND!=0 and NBDCND!=3)):
@@ -92,7 +95,7 @@ def CHKSN4(MBDCND,NBDCND,ALPHA,BETA,COFX,SINGLR):
             return
     for I in range(IS,MS):
         XI=AIT+(I-1)*DLX
-        nptd.COFX(XI,AI,BI,CI)
+        COFX(XI,AI,BI,CI)
         if (CI != 0.0):
             return
     SINGLR= True
@@ -110,10 +113,11 @@ def DEFE4(COFX,IDMN,USOL,GRHS):
                 TX=AI/3.0*(UXXXX/4.0+UXXX/DLX)
             if (KSWY!=1 or (J<1 and J>L)):
                 TY = (UYYYY/4.0+UYYY/DLY)/3.0
-            GRHS(I,J)=GRHS(I,J)+DLY**2*(DLX**2*TX+DLY**2*TY)
+            GRHS[I][J]=GRHS[I][J]+DLY**2*(DLX**2*TX+DLY**2*TY)
+            continue
     for I in range(IS,MS):
         for J in range(JS,NS):
-            USOL(I,J)=GRHS(I,J)
+            USOL[I][J]=GRHS[I][J]
     return
 
 
@@ -128,12 +132,16 @@ def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
         II=I-IS+1
         for J in range(JS,NS):
             JJ=J-JS+1
-            ETE=ETE+ZM(II)*ZN(JJ)
-            UTE=UTE+USOL(I,J)*ZM(II)*ZN(JJ)
+            ETE=ETE+ZM[II]*ZN[JJ]
+            UTE=UTE+USOL[I][J]*ZM[II]*ZN[JJ]
+            continue
+        continue
     PERTB=UTE/ETE
     for I in range(ISTR, IFNL):
         for J in range(JSTR, JFNL):
-            USOL(I,J)=USOL(I,J)-PERTB
+            USOL[I][J]=USOL[I][J]-PERTB
+            continue
+        continue
     return
 def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
     IERROR=0

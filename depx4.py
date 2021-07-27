@@ -189,8 +189,27 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         W[K]=float(2.00)-B[I]
         for J in range(1,N):
             Y[I][J]=-Y[I][J]
+            continue
+        continue
     MP=MPEROD+1
     NP=NPEROD+1
+    #Inico respaldo
+    if MP ==1:
+        MH=(M+1)/2
+        MHM1 = MH-1
+        MODD = 1
+        if (MH*2==M):
+            MODD=2
+        for J in range(1,N):
+            for I in range(1,MHM1):
+                MHPI=MH+I
+                MHMI=MH-I
+                W[I]=Y[MHMI][J]-Y[MHPI][J]
+                W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
+                continue
+            W[MH]=float(2.00)*Y[MH][J]
+            
+#Fnal
     POISP2(M,N,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
     POISD2 (M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
     POISN2 (M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])

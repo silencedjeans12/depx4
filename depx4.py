@@ -208,12 +208,35 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                 W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
                 continue
             W[MH]=float(2.00)*Y[MH][J]
-            
+            if MODD==1:
+                for I in range(1,M):
+                    Y[I][J]=W[I]
+                    continue
+                continue
+            if MODD==2:
+                W[M]=float(2.00)*Y[M][J]
+            K= IWBC+MHM1-1
+            I = IWBA+MHM1
+            W[K] = float(0.000)
+            W[I] = float(0.000)
+            W[K+1] = float(2.00)*W[K+1]
+    if MP==2:
+        if NP==1:
+            POISP2(M,N,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+        if NP==2:
+            POISD2 (M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
+        if NP==3:
+            POISN2 (M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+        if NP==4:
+            POISN2 (M,N,1,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+        
+        IPSTOR=W[IWW1]
+        IREV=2
 #Fnal
-    POISP2(M,N,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
-    POISD2 (M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
-    POISN2 (M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
-    POISN2 (M,N,1,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+    
+    
+    
+    
     IPSTOR=W[IWW1]
     IREV=2
     if(NPEROD==4):

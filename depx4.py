@@ -10,12 +10,13 @@ def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,
     K=M+1
     L=N+1
 #   ESTIMATE LOG BASE 2 OF N
-    LOG2N=int(np.log(np.float32(N+1))/np.log(np.float32(2.0))+np.float32(0.50))
+    
+    LOG2N=int(np.log(np.double(N+1))/np.log(np.double(2.0))+np.double(0.50))
     LENGTH=4*(N+1)+(10+LOG2N)*(M+1)
     IERROR = 11
     LINPUT = int(W[1]+0.5)
     LOUTPT = LENGTH+6*(K+L)+1
-    W[1]=(np.float32(LOUTPT))
+    W[1]=(np.double(LOUTPT))
 #   IF (LOUTPT .GT. LINPUT) RETURN
     IERROR = 0
 #   SET WORK SPACE INDICES
@@ -48,7 +49,7 @@ def SPELI4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,AN,B
     BIT = B
     CIT = C
     DIT = D
-    DLY=(DIT-CIT)/np.float32(N)
+    DLY=(DIT-CIT)/np.double(N)
     for I in range(2,M):
         for J in range(2,N):
             USOL[I][J]=DLY**2**GRHS[I][J]
@@ -78,11 +79,11 @@ def CHKPR4(IORDER,A,B,M,MBDCND,C,D,N,NBDCND,COFX,IDMN,IERROR):
     IERROR=8
     if (IORDER!=2 and IORDER!=4):
         return
-    DLX=(B-A)/float(M)
+    DLX=(B-A)/np.double(M)
     for I in range(2,M):
-        XI=A+float(I-1)*DLX
+        XI=A+np.double(I-1)*DLX
         COFX(XI,AI,BI,CI)
-    if (AI<float(0.00)):
+    if (AI<np.double(0.00)):
         IERROR=10
     IERROR=0
     return
@@ -91,7 +92,7 @@ def CHKSN4(MBDCND,NBDCND,ALPHA,BETA,COFX,SINGLR):
     if ((MBDCND!=0 and MBDCND!=3)or(NBDCND!=0 and NBDCND!=3)):
         return
     if (MBDCND==3):
-        if (ALPHA!=float(0.00)or BETA!=float(0.00)):
+        if (ALPHA!=np.double(0.00)or BETA!=np.double(0.00)):
             return
     for I in range(IS,MS):
         XI=AIT+(I-1)*DLX
@@ -126,8 +127,8 @@ def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
     IFNL=k
     JSTR=1
     JFNL=L
-    UTE=float(0.000)
-    ETE=float(0.000)
+    UTE=np.double(0.000)
+    ETE=np.double(0.000)
     for I in range(IS,MS):
         II=I-IS+1
         for J in range(JS,NS):
@@ -186,7 +187,7 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         K=IWBC+I-1
         W[K]=-C[I]
         K=IWBB+I-1
-        W[K]=float(2.00)-B[I]
+        W[K]=np.double(2.00)-B[I]
         for J in range(1,N):
             Y[I][J]=-Y[I][J]
             continue
@@ -207,31 +208,40 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                 W[I]=Y[MHMI][J]-Y[MHPI][J]
                 W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
                 continue
-            W[MH]=float(2.00)*Y[MH][J]
+            W[MH]=np.double(2.00)*Y[MH][J]
             if MODD==1:
                 for I in range(1,M):
                     Y[I][J]=W[I]
                     continue
                 continue
             if MODD==2:
-                W[M]=float(2.00)*Y[M][J]
+                W[M]=np.double(2.00)*Y[M][J]
             K= IWBC+MHM1-1
             I = IWBA+MHM1
-            W[K] = float(0.000)
-            W[I] = float(0.000)
-            W[K+1] = float(2.00)*W[K+1]
+            W[K] = np.double(0.000)
+            W[I] = np.double(0.000)
+            W[K+1] = np.double(2.00)*W[K+1]
     if MP==2:
         if NP==1:
             POISP2(M,N,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+            IPSTOR=W[IWW1]
+            IREV=2
         if NP==2:
             POISD2 (M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
+            IPSTOR=W[IWW1]
+            IREV=2
         if NP==3:
             POISN2 (M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+            IPSTOR=W[IWW1]
+            IREV=2
         if NP==4:
             POISN2 (M,N,1,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+            IPSTOR=W[IWW1]
+            IREV=2
+        if NP==5:
+            fi=0
         
-        IPSTOR=W[IWW1]
-        IREV=2
+        
 #Fnal
     
     
@@ -260,17 +270,17 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
             W[I]=Y[MHMI][J]-Y[MHPI][J]
             W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
             continue
-        W[MH]=float(2.00)*Y[MH][J]
-        W[M]=float(2.00)*Y[M][J]
+        W[MH]=np.double(2.00)*Y[MH][J]
+        W[M]=np.double(2.00)*Y[M][J]
         continue
     for I in range(1,M):
         Y[I][J]=W[I]
         continue
     K=IWBC+MHM1-1
     I = IWBA+MHM1
-    W[K] = float(0.00)
-    W[I] = float(0.00)
-    W[K+1] = float(2.00)*W[K+1]
+    W[K] = np.double(0.00)
+    W[I] = np.double(0.00)
+    W[K+1] = np.double(2.00)*W[K+1]
     K=IWBB+MHM1-1
     W[K]=W[K]-W[I-1]
     W[IWBC-1]=W[IWBC-1]+W[IWBB-1]
@@ -289,11 +299,11 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         for I in range(1,MHM1):
             MHMI=MH-I
             MHPI = MH+I
-            W[MHMI] =float(0.50)*(Y[MHPI][J]+Y[I][J])
-            W[MHPI] =float(0.50)*(Y[MHPI][J]-Y[I][J])
+            W[MHMI] =np.double(0.50)*(Y[MHPI][J]+Y[I][J])
+            W[MHPI] =np.double(0.50)*(Y[MHPI][J]-Y[I][J])
             continue
-        W[MH]=float(0.50)*Y[MH][J]
-        W[M]=float(0.50)*Y[M][J]
+        W[MH]=np.double(0.50)*Y[MH][J]
+        W[M]=np.double(0.50)*Y[M][J]
         continue
     for I in range(1,M):
         Y[I][J]=W[I]
@@ -304,7 +314,7 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     M=MR
     N=NR
     JSH=0
-    FI=1.0/float(ISTAG)
+    FI=1.0/np.double(ISTAG)
     IP=-M
     IPSTOR=0
     KR=0
@@ -312,7 +322,7 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     if(N>1):
         LR=0
         for I in range(1,M):
-            P[I]=float(0.00)
+            P[I]=np.double(0.00)
     NUM=N
     JST=1
     JSP=N

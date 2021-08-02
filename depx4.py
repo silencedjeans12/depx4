@@ -194,6 +194,7 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         continue
     MP=MPEROD+1
     NP=NPEROD+1
+
     #Inico respaldo
     if MP ==1:
         MH=(M+1)/2
@@ -224,22 +225,27 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
     if MP==2:
         if NP==1:
             POISP2(M,N,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
-            IPSTOR=W[IWW1]
-            IREV=2
         if NP==2:
             POISD2 (M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
-            IPSTOR=W[IWW1]
-            IREV=2
         if NP==3:
             POISN2 (M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
-            IPSTOR=W[IWW1]
-            IREV=2
         if NP==4:
             POISN2 (M,N,1,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
-            IPSTOR=W[IWW1]
-            IREV=2
+        IPSTOR=W[IWW1]
+        IREV=2
+        if NPEROD==4:
+            for J in range(1,NBY2):
+                MSKIP=N+1-J
+                for I in range(1,M):
+                    A1=Y[I][J]
+                    Y[I][J]=Y[I][MSKIP]
+                    Y[I][MSKIP]=A1
+                    continue
+                continue
         if NP==5:
-            fi=0
+            IREV = 1
+            NBY2 = N/2
+
         
         
 #Fnal

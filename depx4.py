@@ -193,8 +193,7 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         continue
     MP=MPEROD+1
     NP=NPEROD+1
-    #Inicio 2
-    #Fin"
+
     #Inico respaldo
     if MP ==1:
         MH=(M+1)/2

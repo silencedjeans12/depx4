@@ -121,7 +121,6 @@ def DEFE4(COFX,IDMN,USOL,GRHS):
             USOL[I][J]=GRHS[I][J]
     return
 
-
 def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
     ISTR=1
     IFNL=k

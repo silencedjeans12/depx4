@@ -194,7 +194,8 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         continue
     MP=MPEROD+1
     NP=NPEROD+1
-
+    #Inicio 2
+    #Fin"
     #Inico respaldo
     if MP ==1:
         MH=(M+1)/2
@@ -245,9 +246,14 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         if NP==5:
             IREV = 1
             NBY2 = N/2
-
-        
-        
+        for J in range(1,NBY2):
+            MSKIP=N+1-J
+            for I in range(1,M):
+                A1=Y[I][J]
+                Y[I][J]=Y[I][MSKIP]
+                Y[I][MSKIP]=A1
+                continue
+            continue
 #Fnal
     
     
@@ -323,12 +329,28 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     FI=1.0/np.double(ISTAG)
     IP=-M
     IPSTOR=0
-    KR=0
-    IRREG=1
+    if ISTAG==1:
+        KR=0
+        IRREG=1
+        if N>1:
+            LR=0
+            for I in range(1,M):
+                P[I]=np.double(0.00)
+                continue
+        NUN=N
+        JST=1
+        JSP=N
+        L=2*JST
+        NODD=2-2*((NUN+1)/2)+NUN
+        if NODD==1:
+            JSP=JSP-L
+            COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+            if L>JSP:
+                S=0
+
     if(N>1):
         LR=0
-        for I in range(1,M):
-            P[I]=np.double(0.00)
+        
     NUM=N
     JST=1
     JSP=N
@@ -353,3 +375,33 @@ def MERGE (TCOS,I1,M1,I2,M2,I3):
             L=J+I1
             TCOS[M]=TCOS[L]
     return
+def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
+    MM1=M-1
+    FB=IDEGBR+1
+    FC=IDEGCR+1
+    L=FB/FC
+    LINT=1
+    for K in range(1,IDEGBR):
+        X=TCOS[K]
+        if K!=L:
+            Z=np.double(1.00)/(B[1]-X)
+            D[1]=C[1]*Z
+            Y[1]=Y[1]*Z
+        I=IDEGBR+LINT
+        XX=X-TCOS[I]
+        for I in range(1,M):
+            W[I]=Y[I]
+            Y[I]=XX*Y[I]
+            continue
+        Z=np.double(1.00)/(B[1]-X)
+        D[1]=C[1]*Z
+        Y[1]=Y[1]*Z
+        
+        for I in range(1,MM1):
+            Z=np.double(1.00)/(B[I]-X-A[I]*D[I-1])
+            D[I]=C[I]*Z
+            Y[I]=(Y[I]-A[I]*Y[I-1])*Z
+            continue
+        Z=B[M]-X-A[M]*D[MM1]
+
+            

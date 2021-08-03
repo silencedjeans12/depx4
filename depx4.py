@@ -218,20 +218,31 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                 continue
             if MODD==2:
                 W[M]=np.double(2.00)*Y[M][J]
+                for I in range(1,M):
+                    Y[I][J]=W[I]
+                    continue
+                continue
             K= IWBC+MHM1-1
             I = IWBA+MHM1
             W[K] = np.double(0.000)
             W[I] = np.double(0.000)
             W[K+1] = np.double(2.00)*W[K+1]
+            if MODD==1:
+                K=IWBB+MHM1-1
+                W[K]=W[K]-W[I-1]
+                W[IWBC-1]=W[IWBC-1]+W[IWBB-1]
+            if MODD==2:
+                W[IWBB-1]=W[K+1]
+            
     if MP==2:
         if NP==1:
             POISP2(M,N,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
         if NP==2:
-            POISD2 (M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
+            POISD2(M,N,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWW1],W[IWD],W[IWTCOS],W[IWP])
         if NP==3:
-            POISN2 (M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+            POISN2(M,N,1,2,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
         if NP==4:
-            POISN2 (M,N,1,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
+            POISN2(M,N,1,1,W[IWBA],W[IWBB],W[IWBC],Y,IDIMY,W,W[IWB2],W[IWB3],W[IWW1],W[IWW2],W[IWW3],W[IWD],W[IWTCOS],W[IWP])
         IPSTOR=W[IWW1]
         IREV=2
         if NPEROD==4:
@@ -368,12 +379,22 @@ def MERGE (TCOS,I1,M1,I2,M2,I3):
             M=K+J
             L=J+I2
             TCOS[M]=TCOS[L]
-    if(M2==0):
-        K=J+J1+1
-        for J in range(J1,M1):
-            M=K+J
-            L=J+I1
-            TCOS[M]=TCOS[L]
+    else:
+        if(M2==0):
+            K=J+J1+1
+            for J in range(J1,M1):
+                M=K+J
+                L=J+I1
+                TCOS[M]=TCOS[L]
+                continue
+        else:
+            J = J+1
+            L = J1+I1
+            X = TCOS[L]
+            L = J2+I2
+            Y = TCOS[L]
+            TCOS[J]=X
+            J1=J1+1
     return
 def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
     MM1=M-1

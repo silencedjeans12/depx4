@@ -79,7 +79,7 @@ def DX4(U,IDMN,I,J,UXXX,UXXXX):
         UXXX = -(np.double(3.00)*U[K-4][J]-np.double(14.00)*U[K-3][J]+np.double(24.00)*U[K-2][J]-np.double(18.00)*U[k-1][J]+np.double(5.00)*U[K][J])/TDLX3
         UXXXX = (-np.double(2.00)*U[K-5][J]+np.double(11.00)*U[K-4][J]-np.double(24.00)*U[K-3][J]+np.double(26.00)*U[K-2][J]-np.double(14.00)*U[k-1][J]+np.double(3.00)*U[K][J])/DLX4
         return
-def ORTHO4 (USOL,IDMN,ZN,ZM,PERTRB):
+def ORTHO4(USOL,IDMN,ZN,ZM,PERTRB):
     ISTR=IS
     IFNL=MS
     JSTR=JS

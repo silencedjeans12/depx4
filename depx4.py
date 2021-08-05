@@ -406,21 +406,33 @@ def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
             Z=np.double(1.00)/(B[1]-X)
             D[1]=C[1]*Z
             Y[1]=Y[1]*Z
-        I=IDEGBR+LINT
-        XX=X-TCOS[I]
-        for I in range(1,M):
-            W[I]=Y[I]
-            Y[I]=XX*Y[I]
-            continue
-        Z=np.double(1.00)/(B[1]-X)
-        D[1]=C[1]*Z
-        Y[1]=Y[1]*Z
-        
-        for I in range(1,MM1):
+        else:
+            I=IDEGBR+LINT
+            XX=X-TCOS[I]
+            for I in range(1,M):
+                W[I]=Y[I]
+                Y[I]=XX*Y[I]
+            Z=np.double(1.00)/(B[1]-X)
+            D[1]=C[1]*Z
+            Y[1]=Y[1]*Z   
+        for I in range(2,MM1):
             Z=np.double(1.00)/(B[I]-X-A[I]*D[I-1])
             D[I]=C[I]*Z
             Y[I]=(Y[I]-A[I]*Y[I-1])*Z
+            Z=B[M]-X-A[M]*D[MM1]
+            if Z!=0:
+                Y[M]=(Y[M]-A[M]*Y[MM1])/Z
+                continue
+            else:
+                Y[M]=np.double(0.00)
+            for IP in range(1,MM1):
+                I=M-IP
+                Y[I]=Y[I]-D[I]*Y[I+1]
+                continue
+    if K==L:
+        for I in range(1,M):
+            Y[I]=Y[I]+W[I]
             continue
-        Z=B[M]-X-A[M]*D[MM1]
-
-            
+        LINT=LINT+1
+        L=(np.double(LINT)*FB)/FC
+    return

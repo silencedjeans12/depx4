@@ -1,5 +1,7 @@
+import numpy as np
 # Metodos de programacion de Yaritza
 def DY4(U,IDMN,I,J,UYYY,UYYYY):
+    U=np.zeros((IDMN,1))
     if(J>2 and J<(L-1)):
         #
         # COMPUTE PARTIAL DERIVATIVE APPROXIMATIONS ON THE INTERIOR
@@ -44,6 +46,7 @@ def DY4(U,IDMN,I,J,UYYY,UYYYY):
         UYYYY = (-2.0*U[I][L-5]+11.0*U[I][L-4]-24.0*U[I][L-3]+26.0*U[I][L-2]-14.0*U[I][L-1]+3.0*U[I][L])/DLY4
         return
 def DX4(U,IDMN,I,J,UXXX,UXXXX):
+    U=np.zeros((IDMN,1))
     if(I>2 and I<(K-1)):
         UXXX = (-U[I-2][J]+np.double(2.00)*U[I-1][J]-np.double(2.00)*U[I+1][J]+U[I+2][J])/TDLX3
         UXXXX = (U[I-2][J]-np.double(4.00)*U[I-1][J]+np.double(6.00)*U(I,J)-np.double(4.00)*U[I+1][J]+U[I+2][J])/DLX4
@@ -80,6 +83,9 @@ def DX4(U,IDMN,I,J,UXXX,UXXXX):
         UXXXX = (-np.double(2.00)*U[K-5][J]+np.double(11.00)*U[K-4][J]-np.double(24.00)*U[K-3][J]+np.double(26.00)*U[K-2][J]-np.double(14.00)*U[k-1][J]+np.double(3.00)*U[K][J])/DLX4
         return
 def ORTHO4(USOL,IDMN,ZN,ZM,PERTRB):
+    USOL=np.zeros((IDMN,1))
+    ZN=np.zeros((1))
+    ZM=np.zeros((1))
     ISTR=IS
     IFNL=MS
     JSTR=JS

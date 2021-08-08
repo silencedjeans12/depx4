@@ -1,6 +1,12 @@
 import numpy as np
 def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,USOL,IDMN,W,PERTRB,IERROR):
-    W=[]
+    GRHS=np.zeros((IDMN,1))
+    USOL=np.zeros((IDMN,1))
+    BDA=np.zeros((1))
+    BDB=np.zeros((1))
+    BDC=np.zeros((1))
+    BDD=np.zeros((1))
+    W=np.zeros((1))
     CHKPR4(IORDER,A,B,M,MBDCND,C,D,N,NBDCND,COFX,IDMN,IERROR)
     if IERROR != 0:
         return
@@ -14,9 +20,9 @@ def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,
     LOG2N=int(np.log(np.double(N+1))/np.log(np.double(2.0))+np.double(0.50))
     LENGTH=4*(N+1)+(10+LOG2N)*(M+1)
     IERROR = 11
-    LINPUT = int(W[1]+0.5)
+    LINPUT = int(W[0]+0.5)
     LOUTPT = LENGTH+6*(K+L)+1
-    W[1]=(np.double(LOUTPT))
+    W[0]=(np.double(LOUTPT))
 #   IF (LOUTPT .GT. LINPUT) RETURN
     IERROR = 0
 #   SET WORK SPACE INDICES
@@ -102,6 +108,8 @@ def CHKSN4(MBDCND,NBDCND,ALPHA,BETA,COFX,SINGLR):
     SINGLR= True
     return
 def DEFE4(COFX,IDMN,USOL,GRHS):
+    GRHS=np.zeros((IDMN,1))
+    USOL=np.zeros((IDMN,1))
     for I in range(IS,MS):
         XI=AIT+(I-1)*DLX
         COFX(XI,AI,BI,CI)
@@ -122,6 +130,9 @@ def DEFE4(COFX,IDMN,USOL,GRHS):
     return
 
 def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
+    USOL=np.zeros((IDMN,1))
+    ZN=np.zeros((1))
+    ZM=np.zeros((1))
     ISTR=1
     IFNL=k
     JSTR=1
@@ -346,6 +357,27 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
             for I in range(1,M):
                 P[I]=np.double(0.00)
                 continue
+            NUN=N
+            JST=1
+            JSP=N
+            L=2*JST
+            NODD=2-2*((NUN+1)/2)+NUN
+            if NODD==1:
+                JSP=JSP-JST
+                if IRREG!=1:
+                    JSP=JSP-L
+                COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+                
+        else:
+            TCOS[1]=np.double(0.00)
+            for I in range(1,M):
+                B[I]=Q[I][1]
+                continue
+            TRIX(1,0,M,BA,BB,BC,B,TCOS,D,W)
+            for I in range(1,M):
+                Q[I][1]=B[I]
+                continue
+            W[1]=IPSTOR
         NUN=N
         JST=1
         JSP=N
@@ -367,7 +399,7 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     
         
 def MERGE (TCOS,I1,M1,I2,M2,I3):
-    TCOS=[]
+    TCOS=np.zeros((1))
     J1 = 1
     J2 = 1
     J = I3
@@ -395,6 +427,13 @@ def MERGE (TCOS,I1,M1,I2,M2,I3):
             J1=J1+1
     return
 def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
+    A=np.zeros((1))
+    B=np.zeros((1))
+    C=np.zeros((1))
+    Y=np.zeros((1))
+    TCOS=np.zeros((1))
+    D=np.zeros((1))
+    W=np.zeros((1))
     MM1=M-1
     FB=IDEGBR+1
     FC=IDEGCR+1

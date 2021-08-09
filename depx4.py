@@ -343,16 +343,27 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
     W[1]=IPSTOR+IWP-1
     return
 def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
+    Q=np.zeros((IDIMQ,1))
+    BA=np.zeros((1))
+    BB=np.zeros((1))
+    BC=np.zeros((1))
+    TCOS=np.zeros((1))
+    B=np.zeros((1))
+    D=np.zeros((1))
+    W=np.zeros((1))
+    P=np.zeros((1))
     M=MR
     N=NR
     JSH=0
     FI=1.0/np.double(ISTAG)
     IP=-M
     IPSTOR=0
-    if ISTAG==1:
+    if ISTAG==1:#---->101
+        #101
         KR=0
         IRREG=1
-        if N>1:
+        if N>1:#----->106
+            #106
             LR=0
             for I in range(1,M):
                 P[I]=np.double(0.00)
@@ -362,14 +373,56 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
             JSP=N
             L=2*JST
             NODD=2-2*((NUN+1)/2)+NUN
-            if NODD==1:
-                JSP=JSP-JST
-                if IRREG!=1:
+            while IRREG==1:
+
+                if NODD==1:#------>110
+                    #110
+                    JSP=JSP-JST
+                    if IRREG!=1:
+                        JSP=JSP-L
+                if NODD==2:#---->109
+                    #109
                     JSP=JSP-L
                 COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+                if L<JSP:#---->118
+                    for J in range(L,JSP,L):
+                        JM1 = J-JSH
+                        JP1 = J+JSH
+                        JM2 = J-JST
+                        JP2 = J+JST
+                        JM3 = JM2-JSH
+                        JP3 = JP2+JSH
+                        if JST!=1:
+                            for I in range(1,M):
+                                T = Q[I][J]-Q[I][JM1]-Q[I][JP1]+Q[I][JM2]+Q[I][JP2]
+                                B[I] = T+Q[I][J]-Q[I][JM3]-Q[I][JP3]
+                                Q[I][J] = T
+                        else:
+                            for I in range(1,M):
+                                B[I]=np.double(2.00)*Q[I][J]
+                                Q[I][J]=Q[I][JM2]+Q[I][JP2]
+                        TRIX(JST,0,M,BA,BB,BC,B,TCOS,D,W)
+                        for I in range(1,M):
+                            Q[I][J]=Q[I][J]+B[I]
+                            continue
+                        continue
+                if NODD==1:
+                    if IRREG==1:
+                        NUN=NUN/2
+                        NODDPR=NODD
+                        JSH=JST
+                        JST=2*JST
+                        if NUN>=2:#---->108
+                            L = 2*JST
+                            NODD = 2-2*((NUN+1)/2)+NUN
+                        else:
+                            J=JSP
+                            for I in range(1,M):
+                                B[I]=Q[I][J]
+                                    
                 
         else:
-            TCOS[1]=np.double(0.00)
+            TCOS[0]=np.double(0.00)
             for I in range(1,M):
                 B[I]=Q[I][1]
                 continue
@@ -377,24 +430,7 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
             for I in range(1,M):
                 Q[I][1]=B[I]
                 continue
-            W[1]=IPSTOR
-        NUN=N
-        JST=1
-        JSP=N
-        L=2*JST
-        NODD=2-2*((NUN+1)/2)+NUN
-        if NODD==1:
-            JSP=JSP-L
-            COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
-            if L>JSP:
-                S=0
-
-    if(N>1):
-        LR=0
-        
-    NUM=N
-    JST=1
-    JSP=N
+            W[0]=IPSTOR
 #continuacion.   
     
         

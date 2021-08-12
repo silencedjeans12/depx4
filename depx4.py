@@ -1,3 +1,4 @@
+from typing import ForwardRef
 import numpy as np
 def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,USOL,IDMN,W,PERTRB,IERROR):
     GRHS=np.zeros((IDMN,1))
@@ -200,13 +201,25 @@ def DEFE4(COFX,IDMN,USOL,GRHS):
             USOL[I][J]=GRHS[I][J]
 
 def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
+#
+#     THIS SUBROUTINE ORTHO4ONALIZES THE ARRAY USOL WITH RESPECT TO
+#     THE CONSTANT ARRAY IN A WEIGHTED LEAST SQUARES NORM
+#
     USOL=np.zeros((IDMN,1))
     ZN=np.zeros((1))
     ZM=np.zeros((1))
+#
+#     ENTRY AT MINSO4 OCCURRS WHEN THE FINAL SOLUTION IS
+#     TO BE MINIMIZED WITH RESPECT TO THE WEIGHTED
+#     LEAST SQUARES NORM
+#
     ISTR=1
     IFNL=k
     JSTR=1
     JFNL=L
+#
+#     COMPUTE WEIGHTED INNER PRODUCTS
+#
     UTE=np.double(0.000)
     ETE=np.double(0.000)
     for I in range(IS,MS):
@@ -214,16 +227,18 @@ def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
         for J in range(JS,NS):
             JJ=J-JS+1
             ETE=ETE+ZM[II]*ZN[JJ]
-            UTE=UTE+USOL[I][J]*ZM[II]*ZN[JJ]
-            
-        
+            UTE=UTE+USOL[I][J]*ZM[II]*ZN[JJ]         
+#
+#     SET PERTURBATION PARAMETER
+#
     PERTB=UTE/ETE
+#
+#     SUBTRACT OFF CONSTANT PERTRB
+#
     for I in range(ISTR, IFNL):
         for J in range(JSTR, JFNL):
             USOL[I][J]=USOL[I][J]-PERTB
-            
-        
-    return
+
 def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
     IERROR=0
     if(M<=2):
@@ -413,6 +428,13 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
     W[1]=IPSTOR+IWP-1
     return
 def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
+#
+#     SUBROUTINE TO SOLVE POISSON'S EQUATION FOR DIRICHLET BOUNDARY
+#     CONDITIONS.
+#
+#     ISTAG = 1 IF THE LAST DIAGONAL BLOCK IS THE MATRIX A.
+#     ISTAG = 2 IF THE LAST DIAGONAL BLOCK IS THE MATRIX A+I.
+#
     Q=np.zeros((IDIMQ,1))
     BA=np.zeros((1))
     BB=np.zeros((1))
@@ -428,15 +450,6 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     FI=1.0/np.double(ISTAG)
     IP=-M
     IPSTOR=0
-    if ISTAG==1:#--->101
-        KR=0
-        IRREG=1
-        if N>1:#---->106
-            return
-    elif ISTAG==2:#--->102
-        KR=1
-        JSTSAV=1
-        IRREG=2
     if ISTAG==1:#---->101
         #101
         KR=0
@@ -586,26 +599,168 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
                                                         
                                                     IP=IP-M
                                                 L=L/2
-                                                
-                                                      
-
-
-                                       
-
+    elif ISTAG==2:
+        KR=1
+        JSTSAV=1
+        IRREG=2
+        if N>1:
+            LR=0
+            for I in range(1,M):
+                P[I]=0.00
+            NUN=N
+            JST=1
+            JSP=N
+            L=2*JST
+            NODD=2-2*((NUN+1)/2)+NUN
+            if NODD==1:
+                JSP=JSP-JST
+                if IRREG!=1:
+                    JSP=JSP-L
+            if NODD==2:
+                JSP=JSP-L
+            COSGEN(JST,1,0.50,0.00,TCOS)
+            if L<JSP:#---->118
+                    for J in range(L,JSP,L):
+                        JM1 = J-JSH
+                        JP1 = J+JSH
+                        JM2 = J-JST
+                        JP2 = J+JST
+                        JM3 = JM2-JSH
+                        JP3 = JP2+JSH
+                        if JST!=1:
+                            for I in range(1,M):
+                                T = Q[I][J]-Q[I][JM1]-Q[I][JP1]+Q[I][JM2]+Q[I][JP2]
+                                B[I] = T+Q[I][J]-Q[I][JM3]-Q[I][JP3]
+                                Q[I][J] = T
+                        else:
+                            for I in range(1,M):
+                                B[I]=np.double(2.00)*Q[I][J]
+                                Q[I][J]=Q[I][JM2]+Q[I][JP2]
+                        TRIX(JST,0,M,BA,BB,BC,B,TCOS,D,W)
+                        for I in range(1,M):
+                            Q[I][J]=Q[I][J]+B[I]
+                            
+                        
+                    if NODD==1:
+                        if IRREG==1:
+                            NUN=NUN/2
+                            NODDPR=NODD
+                            JSH=JST
+                            JST=2*JST
+                            if NUN>=2:#---->108
+                                L = 2*JST
+                                NODD = 2-2*((NUN+1)/2)+NUN
+                            else:
+                                J=JSP
+                                for I in range(1,M):
+                                    B[I]=Q[I][J]
+                            if IRREG==1:#--->154
+                                #154
+                                COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+                                IDEG=JST
+                            if IRREG==2:#-->155
+                                #155
+                                KR=LR+JST
+                                COSGEN(KR,JSTSAV,np.double(0.00),FI,TCOS)
+                                COSGEN(LR,JSTSAV,np.double(0.00),FI,TCOS(KR+1))
+                                IDEG=KR
+                            TRIX(IDEG,LR,M,BA,BB,BC,B,TCOS,D,W)
+                            JM1=J-JSH
+                            JP1 = J+JSH            
+                            if IRREG==1:#--->157
+                                #157
+                                for I in range(1,M):
+                                    Q[I][J]=np.double(.50)*(Q[I][J]-Q[I][JM1]-Q[I][JP1])+B[I]
+                            if IRREG==2:#--->159
+                                #159
+                                if NODDPR==1:#--->160
+                                    #160
+                                    for I in range(1,M):
+                                        IP1=IP+I
+                                        Q[I][J]=P[IP1]+B[I]
+                                    IP=IP-M        
+                                if NODDPR==2:#--->162
+                                    #162
+                                    for I in range(1,M):
+                                        Q[I][J]=Q[I][J]-Q[I][JM1]+B[I]
+                                JST = JST/2
+                                JSH = JST/2
+                                NUN = 2*NUN
+                                if NUN<N:
+                                    for J in range(JST,N,L):
+                                        JM1 = J-JSH
+                                        JP1 = J+JSH
+                                        JM2 = J-JST
+                                        JP2 = J+JST 
+                                        if J<JST:#ELSE DE 166
+                                            for I in range(1,M):
+                                                B[I]=Q[I][J]+Q[I][JP2]
+                                            COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+                                            IDEG = JST
+                                            JDEG = 0
+                                        else:
+                                            if JP2<=N:#168
+                                                for I in range(1,M):
+                                                    B[I]=Q[I][J]+Q[I][JM2]+Q[I][JP2]
+                                                COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+                                                IDEG = JST
+                                                JDEG = 0
+                                            else:
+                                                for I in range(1,M):
+                                                    B[I]=Q[I][J]+Q[I][JM2]
+                                                if JST<JSTSAV:
+                                                    IRREG=1
+                                                if IRREG==1:
+                                                    COSGEN(JST,1,np.double(0.50),np.double(0.00),TCOS)
+                                                    IDEG = JST
+                                                    JDEG = 0
+                                                if IRREG==2:
+                                                    if(J+L>N):
+                                                        LR=LR-JST
+                                                    KR=JST+LR
+                                                    COSGEN(KR,JSTSAV,np.double(0.00),FI,TCOS)
+                                                    COSGEN(LR,JSTSAV,np.double(0.00),FI,TCOS[KR+1])
+                                                    IDEG=KR
+                                                    JDEG=LR
+                                        TRIX(IDEG,JDEG,M,BA,BB,BC,B,TCOS,D,W)
+                                        if JST>1:
+                                            if JP2>N:
+                                                if IRREG==1:#--->175
+                                                    for I in range(1,M):
+                                                        Q[I][J]=np.double(0.50)*(Q[I][J]-Q[I][JM1]-Q[I][JP1])+B[I]
+                                                if IRREG==2:#---->178
+                                                    #178
+                                                    if J+JSH>N:#--->180
+                                                        for I in range(1,M):
+                                                            Q[I][J]=B[I]+Q[I][J]-Q[I][JM1]
+                                                            
+                                                        
+                                                    else:
+                                                        for I in range(1,M):
+                                                            IP1=IP+I
+                                                            Q[I][J]=B[I]+P[IP1]
+                                                            
+                                                        IP=IP-M
+                                                    L=L/2
         else:
-            TCOS[0]=np.double(0.00)
+            TCOS[1]=-1.00
             for I in range(1,M):
                 B[I]=Q[I][1]
-                
-            TRIX(1,0,M,BA,BB,BC,B,TCOS,D,W)
+            TRIX(1,0,M,BA,BB,BC,B,TCOS,D,W)                                          
             for I in range(1,M):
                 Q[I][1]=B[I]
-                
-            W[0]=IPSTOR
-#continuacion.   
+    W[0]=IPSTOR                                
     
         
 def MERGE (TCOS,I1,M1,I2,M2,I3):
+#
+#
+#     THIS SUBROUTINE MERGES TWO ASCENDING STRINGS OF NUMBERS IN THE
+#     ARRAY TCOS.  THE FIRST STRING IS OF LENGTH M1 AND STARTS AT
+#     TCOS(I1+1).  THE SECOND STRING IS OF LENGTH M2 AND STARTS AT
+#     TCOS(I2+1).  THE MERGED STRING GOES INTO TCOS(I3+1).
+#
+#
     TCOS=np.zeros((1))
     J1 = 1
     J2 = 1
@@ -634,6 +789,11 @@ def MERGE (TCOS,I1,M1,I2,M2,I3):
             J1=J1+1
     return
 def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
+#
+#     SUBROUTINE TO SOLVE A SYSTEM OF LINEAR EQUATIONS WHERE THE
+#     COEFFICIENT MATRIX IS A RATIONAL FUNCTION IN THE MATRIX GIVEN BY
+#     TRIDIAGONAL  ( . . . , A(I), B(I), C(I), . . . ).
+#
     A=np.zeros((1))
     B=np.zeros((1))
     C=np.zeros((1))
@@ -681,4 +841,4 @@ def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
             
         LINT=LINT+1
         L=(np.double(LINT)*FB)/FC
-    return
+

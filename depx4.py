@@ -1,4 +1,3 @@
-from typing import ForwardRef
 import numpy as np
 def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,USOL,IDMN,W,PERTRB,IERROR):
     GRHS=np.zeros((IDMN,1))
@@ -40,8 +39,7 @@ def DEPX4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,GRHS,
     I11 = I10+K
     I12 = I11+K
     I13 = 2
-    SPELIA4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,W[I1],W[I2],W[I3],W[I4],W[I5],W[I6],W[I7],W[I8],W[I9],W[I10],W[I11],W[I12],GRHS,USOL,IDMN,W[I13],PERTRB,IERROR)
-    return 
+    SPELIA4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,W[I1],W[I2],W[I3],W[I4],W[I5],W[I6],W[I7],W[I8],W[I9],W[I10],W[I11],W[I12],GRHS,USOL,IDMN,W[I13],PERTRB,IERROR) 
 def SPELI4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,AN,BN,CN,DN,UN,ZN,AM,BM,CM,DM,UM,ZM,GRHS,USOL,IDMN,W,PERTRB,IERROR):
     global KSWX,KSWY,K,L
     global AIT,BIT,CIT,DIT
@@ -60,75 +58,146 @@ def SPELI4(IORDER,A,B,M,MBDCND,BDA,ALPHA,BDB,BETA,C,D,N,NBDCND,BDC,BDD,COFX,AN,B
     for I in range(2,M):
         for J in range(2,N):
             USOL[I][J]=DLY**2**GRHS[I][J]
-            continue
-        continue
+            
+        
     if (KSWX==2 or KSWX==3):
         f=0
 def CHKPR4(IORDER,A,B,M,MBDCND,C,D,N,NBDCND,COFX,IDMN,IERROR):
+#
+#     THIS PROGRAM CHECKS THE INPUT PARAMETERS FOR ERRORS
+#
+#
+#
+#     CHECK DEFINITION OF SOLUTION REGION
+#
     IERROR=1
     if (A>=B or C>=D):
         return
+#
+#     CHECK BOUNDARY SWITCHES
+#
     IERROR=2
     if (MBDCND<0 or MBDCND>4):
         return
     IERROR=3
     if (NBDCND<0 or NBDCND>4):
         return
+#
+#     CHECK FIRST DIMENSION IN CALLING ROUTINE
+#
     IERROR=5
     if (IDMN<7):
         return
+#
+#   CHECK M
+#
     IERROR=6
     if (M>(IDMN-1)or M<6):
         return
+#
+#   CHECK N
+#
     IERROR=7
     if (N<5):
         return
+#
+#   CHECK IORDER
+#
     IERROR=8
     if (IORDER!=2 and IORDER!=4):
         return
+#
+#     CHECK INTL
+#
+#
+#     CHECK THAT EQUATION IS ELLIPTIC
+#
     DLX=(B-A)/np.double(M)
     for I in range(2,M):
         XI=A+np.double(I-1)*DLX
         COFX(XI,AI,BI,CI)
     if (AI<np.double(0.00)):
         IERROR=10
+#
+#     NO ERROR FOUND
+#
     IERROR=0
-    return
 def CHKSN4(MBDCND,NBDCND,ALPHA,BETA,COFX,SINGLR):
+#
+#     THIS SUBROUTINE CHECKS IF THE PDE   SEPX4
+#     MUST SOLVE IS A SINGULAR OPERATOR
+#
     SINGLR=False
+#
+#     CHECK IF THE BOUNDARY CONDITIONS ARE
+#     ENTIRELY PERIODIC AND/OR MIXED
+#
     if ((MBDCND!=0 and MBDCND!=3)or(NBDCND!=0 and NBDCND!=3)):
         return
+#
+#     CHECK THAT MIXED CONDITIONS ARE PURE NEUMAN
+#
     if (MBDCND==3):
         if (ALPHA!=np.double(0.00)or BETA!=np.double(0.00)):
             return
+#
+#     CHECK THAT NON-DERIVATIVE COEFFICIENT FUNCTIONS
+#     ARE ZERO
+#
     for I in range(IS,MS):
         XI=AIT+(I-1)*DLX
         COFX(XI,AI,BI,CI)
         if (CI != 0.0):
             return
     SINGLR= True
-    return
 def DEFE4(COFX,IDMN,USOL,GRHS):
+#
+#     THIS SUBROUTINE FIRST APPROXIMATES THE TRUN1ATION ERROR GIVEN BY
+#     TRUN1(X,Y)=DLX**2*TX+DLY**2*TY WHERE
+#     TX=AFUN(X)*UXXXX/12.0+BFUN(X)*UXXX/6.0 ON THE INTERIOR AND
+#     AT THE BOUNDARIES IF PERIODIC(HERE UXXX,UXXXX ARE THE THIRD
+#     AND FOURTH PARTIAL DERIVATIVES OF U WITH RESPECT TO X).
+#     TX IS OF THE FORM AFUN(X)/3.0*(UXXXX/4.0+UXXX/DLX)
+#     AT X=A OR X=B IF THE BOUNDARY CONDITION THERE IS MIXED.
+#     TX=0.0 ALONG SPECIFIED BOUNDARIES.  TY HAS SYMMETRIC FORM
+#     IN Y WITH X,AFUN(X),BFUN(X) REPLACED BY Y,DFUN(Y),EFUN(Y).
+#     THE SECOND ORDER SOLUTION IN USOL IS USED TO APPROXIMATE
+#     (VIA SECOND ORDER FINITE DIFFERENCING) THE TRUN1ATION ERROR
+#     AND THE RESULT IS ADDED TO THE RIGHT HAND SIDE IN GRHS
+#     AND THEN TRANSFERRED TO USOL TO BE USED AS A NEW RIGHT
+#     HAND SIDE WHEN CALLING BLKTRI FOR A FOURTH ORDER SOLUTION.
+#
     GRHS=np.zeros((IDMN,1))
     USOL=np.zeros((IDMN,1))
+#
+#
+#     COMPUTE TRUN1ATION ERROR APPROXIMATION OVER THE ENTIRE MESH
+#
     for I in range(IS,MS):
         XI=AIT+(I-1)*DLX
         COFX(XI,AI,BI,CI)
         for J in range(JS,NS):
+#
+#     COMPUTE PARTIAL DERIVATIVE APPROXIMATIONS AT (XI,YJ)
+#
             DX4(USOL,IDMN,I,J,UXXX,UXXXX)
             DY4(USOL,IDMN,I,J,UYYY,UYYYY)
             TX=AI*UXXXX/12.0+BI*UXXX/6.0
             TY=UYYYY/12.0
+#
+#     RESET FORM OF TRUN1ATION IF AT BOUNDARY WHICH IS NON-PERIODIC
+#
             if (KSWX !=1 or (I<1 and I>K)):
                 TX=AI/3.0*(UXXXX/4.0+UXXX/DLX)
             if (KSWY!=1 or (J<1 and J>L)):
                 TY = (UYYYY/4.0+UYYY/DLY)/3.0
             GRHS[I][J]=GRHS[I][J]+DLY**2*(DLX**2*TX+DLY**2*TY)
-            continue
+#
+#     RESET THE RIGHT HAND SIDE IN USOL
+#       
     for I in range(IS,MS):
         for J in range(JS,NS):
             USOL[I][J]=GRHS[I][J]
-    return
 
 def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
     USOL=np.zeros((IDMN,1))
@@ -146,14 +215,14 @@ def MINSO4(USOL,IDMN,ZN,ZM,PERTB):
             JJ=J-JS+1
             ETE=ETE+ZM[II]*ZN[JJ]
             UTE=UTE+USOL[I][J]*ZM[II]*ZN[JJ]
-            continue
-        continue
+            
+        
     PERTB=UTE/ETE
     for I in range(ISTR, IFNL):
         for J in range(JSTR, JFNL):
             USOL[I][J]=USOL[I][J]-PERTB
-            continue
-        continue
+            
+        
     return
 def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
     IERROR=0
@@ -201,8 +270,8 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
         W[K]=np.double(2.00)-B[I]
         for J in range(1,N):
             Y[I][J]=-Y[I][J]
-            continue
-        continue
+            
+        
     MP=MPEROD+1
     NP=NPEROD+1
 
@@ -219,19 +288,19 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                 MHMI=MH-I
                 W[I]=Y[MHMI][J]-Y[MHPI][J]
                 W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
-                continue
+                
             W[MH]=np.double(2.00)*Y[MH][J]
             if MODD==1:
                 for I in range(1,M):
                     Y[I][J]=W[I]
-                    continue
-                continue
+                    
+                
             if MODD==2:
                 W[M]=np.double(2.00)*Y[M][J]
                 for I in range(1,M):
                     Y[I][J]=W[I]
-                    continue
-                continue
+                    
+                
             K= IWBC+MHM1-1
             I = IWBA+MHM1
             W[K] = np.double(0.000)
@@ -262,8 +331,8 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                     A1=Y[I][J]
                     Y[I][J]=Y[I][MSKIP]
                     Y[I][MSKIP]=A1
-                    continue
-                continue
+                    
+                
         if NP==5:
             IREV = 1
             NBY2 = N/2
@@ -273,8 +342,8 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                 A1=Y[I][J]
                 Y[I][J]=Y[I][MSKIP]
                 Y[I][MSKIP]=A1
-                continue
-            continue
+                
+            
 #Fnal
     
     
@@ -289,8 +358,8 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
                 A1=Y[I][J]
                 Y[I][J]=Y[I][MSKIP]
                 Y[I][MSKIP]=A1
-                continue
-            continue
+                
+            
     MH = (M+1)/2
     MHM1 = MH-1
     MODD = 1
@@ -302,13 +371,13 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
             MHMI=MH-I
             W[I]=Y[MHMI][J]-Y[MHPI][J]
             W[MHPI]=Y[MHMI][J]+Y[MHPI][J]
-            continue
+            
         W[MH]=np.double(2.00)*Y[MH][J]
         W[M]=np.double(2.00)*Y[M][J]
-        continue
+        
     for I in range(1,M):
         Y[I][J]=W[I]
-        continue
+        
     K=IWBC+MHM1-1
     I = IWBA+MHM1
     W[K] = np.double(0.00)
@@ -326,21 +395,21 @@ def GENBUN(NPEROD,N,MPEROD,M,A,B,C,IDIMY,Y,IERROR,W):
             A1=Y[I][J]
             Y[I][J]=Y[I][MSKIP]
             Y[I][MSKIP]=A1
-            continue
-        continue
+            
+        
     for J in range(1,N):
         for I in range(1,MHM1):
             MHMI=MH-I
             MHPI = MH+I
             W[MHMI] =np.double(0.50)*(Y[MHPI][J]+Y[I][J])
             W[MHPI] =np.double(0.50)*(Y[MHPI][J]-Y[I][J])
-            continue
+            
         W[MH]=np.double(0.50)*Y[MH][J]
         W[M]=np.double(0.50)*Y[M][J]
-        continue
+        
     for I in range(1,M):
         Y[I][J]=W[I]
-        continue
+        
     W[1]=IPSTOR+IWP-1
     return
 def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
@@ -359,6 +428,15 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
     FI=1.0/np.double(ISTAG)
     IP=-M
     IPSTOR=0
+    if ISTAG==1:#--->101
+        KR=0
+        IRREG=1
+        if N>1:#---->106
+            return
+    elif ISTAG==2:#--->102
+        KR=1
+        JSTSAV=1
+        IRREG=2
     if ISTAG==1:#---->101
         #101
         KR=0
@@ -368,7 +446,7 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
             LR=0
             for I in range(1,M):
                 P[I]=np.double(0.00)
-                continue
+                
             NUN=N
             JST=1
             JSP=N
@@ -405,8 +483,8 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
                         TRIX(JST,0,M,BA,BB,BC,B,TCOS,D,W)
                         for I in range(1,M):
                             Q[I][J]=Q[I][J]+B[I]
-                            continue
-                        continue
+                            
+                        
                 if NODD==1:
                     if IRREG==1:
                         NUN=NUN/2
@@ -491,15 +569,24 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
                                     TRIX(IDEG,JDEG,M,BA,BB,BC,B,TCOS,D,W)
                                     if JST>1:
                                         if JP2>N:
-                                            if IRREG==1:
+                                            if IRREG==1:#--->175
                                                 for I in range(1,M):
                                                     Q[I][J]=np.double(0.50)*(Q[I][J]-Q[I][JM1]-Q[I][JP1])+B[I]
-                                            if IRREG==2:
-                                                if J+JSH>N:
+                                            if IRREG==2:#---->178
+                                                #178
+                                                if J+JSH>N:#--->180
                                                     for I in range(1,M):
                                                         Q[I][J]=B[I]+Q[I][J]-Q[I][JM1]
-                                                        continue
-                                                    continue
+                                                        
+                                                    
+                                                else:
+                                                    for I in range(1,M):
+                                                        IP1=IP+I
+                                                        Q[I][J]=B[I]+P[IP1]
+                                                        
+                                                    IP=IP-M
+                                                L=L/2
+                                                
                                                       
 
 
@@ -509,11 +596,11 @@ def POISD2 (MR,NR,ISTAG,BA,BB,BC,Q,IDIMQ,B,W,D,TCOS,P):
             TCOS[0]=np.double(0.00)
             for I in range(1,M):
                 B[I]=Q[I][1]
-                continue
+                
             TRIX(1,0,M,BA,BB,BC,B,TCOS,D,W)
             for I in range(1,M):
                 Q[I][1]=B[I]
-                continue
+                
             W[0]=IPSTOR
 #continuacion.   
     
@@ -536,7 +623,7 @@ def MERGE (TCOS,I1,M1,I2,M2,I3):
                 M=K+J
                 L=J+I1
                 TCOS[M]=TCOS[L]
-                continue
+                
         else:
             J = J+1
             L = J1+I1
@@ -581,17 +668,17 @@ def TRIX (IDEGBR,IDEGCR,M,A,B,C,Y,TCOS,D,W):
             Z=B[M]-X-A[M]*D[MM1]
             if Z!=0:
                 Y[M]=(Y[M]-A[M]*Y[MM1])/Z
-                continue
+                
             else:
                 Y[M]=np.double(0.00)
             for IP in range(1,MM1):
                 I=M-IP
                 Y[I]=Y[I]-D[I]*Y[I+1]
-                continue
+                
     if K==L:
         for I in range(1,M):
             Y[I]=Y[I]+W[I]
-            continue
+            
         LINT=LINT+1
         L=(np.double(LINT)*FB)/FC
     return
